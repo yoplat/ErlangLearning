@@ -1,6 +1,9 @@
 -module(generator).
 -export([init/3]).
 
+% P is the processor position in the sequence
+% N is the number of processors in the system
+% M is the number of possible values
 init(P, N, M) ->
     counter(
         1,
@@ -12,13 +15,13 @@ init(P, N, M) ->
         M
     ).
 
-% Own counter increases every M^(N-P) ticks
+% The counter advances after M^(N-P) ticks
 % Seq is the iteration number
-% Delay is the countdown to the next increase
-% Value is the current value of the counter
-% T is the maximum iterations
+% Delay downcounts from the number of ticks needed before incresing the counter M ^ (N-P)
+% Value if the current value of the counter, if greater than M the counter stops
+% T is the Total number of iterations (M^N)
 counter(Seq, _, T, _, _, _, _) when Seq > T -> stop;
-counter(Seq, _, T, Value, P, N, M) when (Value > M) ->
+counter(Seq, _, T, Value, P, N, M) when Value > M ->
     counter(Seq, trunc(math:pow(M, (N - P))), T, 1, P, N, M);
 counter(Seq, 1, T, Value, P, N, M) ->
     entrypoint ! {seq, Seq, val, Value, pos, P},
